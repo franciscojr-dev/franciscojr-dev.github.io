@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+    <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+
+    <script>
+        var connection = new RTCMultiConnection();
+
+        // this line is VERY_important
+        connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+        // if you want audio+video conferencing
+        connection.session = {
+            audio: true,
+            video: true
+        };
+
+        connection.openOrJoin('teste2020-asc');
+        
+        connection.onPeerStateChanged = function(state) {
+            if (state.iceConnectionState.search(/closed|failed/gi) !== -1) {
+                // you can merely rejoin the room; not a specific user
+                if (!connection.getAllParticipants().length) {
+                    connection.close();
+                    connection.closeSocket();
+                    connection.dontCaptureUserMedia = true;
+                    setTimeout(function() {
+                        connection.openOrJoin(connection.sessiond, function(isRoomAlreadyCreated, roomid, error) {
+                            if (error) {
+                                alert(error);
+                            }
+                        });
+                    }, 2000);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
